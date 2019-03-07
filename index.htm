@@ -1,0 +1,88 @@
+<html>
+<head>		
+	<title>SFIA Interactive: Star Lifetimes
+	</title>
+	<style>
+		html {
+			overflow: scroll;
+		}
+		body {
+			font-family: Monospace;
+			font-size:16px;
+			background-color: #A5A5A5;
+			margin: 10px;
+			overflow: hidden;
+		}
+		#div_all {
+			border: 0px solid yellow;
+			background-color:#555555;
+			width:100%;			
+			max-width:1400px;
+			margin: 0px auto;
+		}	
+		#img_banner {
+			width:100%;
+		}				
+		#span_info {			
+			font-family: Monospace;
+			font-size:16px;
+			margin:0px;
+		}
+		#ref1 {			
+			margin:2px;
+			float:left;
+			color:#888888;
+		}
+		#ref2 {			
+			margin:2px;
+			float:right;
+			color:#888888;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="div_all">
+		<img id="img_banner" src="img/sfia.png"/>		
+		<span id="span_info">			
+			<a id="ref1" href="https://www.youtube.com/watch?v=Pld8wTa16Jk">
+				From Civilizations at the end of time series
+			</a>
+			<a id="ref2" href="https://ydvisual.github.io/YdvPortfolio/index.htm">
+				Graphics by YD Visual(Ken York)
+			</a>
+		</span>		
+		<canvas id="canvas_gfx">HTML5 Canvas not supported!</canvas>				
+		<canvas id="canvas_info">HTML5 Canvas not supported!</canvas>
+		<div>
+		1: Our Sun vs Red Dwarf<br>
+		2: Our Sun vs Red Dwarf 2x speed<br>
+		3: Our sun(type 2) vs Type 1<br>
+		4: Our Sun vs Red Dwarf<br>
+		5: Our Sun vs Red Dwarf 2x speed<br>
+		6: Our sun(type 2) vs Type 1<br>
+		Line 00: More info<br>
+		Line 01: More info<br>
+		Line 02: More info<br>
+		Line 03: More info<br>
+		Line 04: More info<br>
+		Line 05: More info<br>
+		Line 06: More info<br>
+		Line 07: More info<br>
+		Line 08: More info<br>
+		Line 09: More info<br>
+		Line 10: More info<br>
+		<a id="ref1" href="https://www.youtube.com/watch?v=Pld8wTa16Jk">
+				Based on "Civilizations at the end of time", Episode 178: Dying Stars
+		</a><br>
+		Line 11: More info<br>
+		Line 12: More info<br>
+		</div>
+	</div>
+	
+	<script src="scripts/three.min.js"></script>
+	<script src="scripts/OBJLoader.js"></script>
+	<script src="scripts/gfx.js"></script>
+</body>
+
+</html>

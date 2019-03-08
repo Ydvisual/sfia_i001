@@ -89,7 +89,7 @@ var c = document.getElementById("canvas_info");
 c.width = 1400;
 c.height = 200;
 c.addEventListener('click', function() {
-	frn = frn_start;
+	frn = 0;
 }
 	, false);
 
@@ -321,7 +321,7 @@ var draw = function() {
 	ctx.lineTo(px, py0 + y_ext);
 	ctx.stroke();
 	
-	str = "a=2click, ntime: " + ntime;
+	str = "a=2click,f0, ntime: " + ntime;
 	ctx.font = "20px Georgia";
 	ctx.fillText(str, 10, 180);
 	

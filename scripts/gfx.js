@@ -9,7 +9,7 @@ var cam = new THREE.PerspectiveCamera(36, asp, 0.1, 1000);
 var clock = new THREE.Clock();
 clock.start();
 var frn = -120;
-var frn_adv = 1;
+var frn_adv = 2;
 var frn_max = 60100; // Lower = faster (6000 def)
 var ntime = 0.0; // normal time
 
@@ -317,7 +317,7 @@ var draw = function() {
 	ctx.lineTo(px, py0 + y_ext);
 	ctx.stroke();
 	
-	str = "ntime: " + ntime;
+	str = "a=2, ntime: " + ntime;
 	ctx.font = "20px Georgia";
 	ctx.fillText(str, 10, 180);
 	

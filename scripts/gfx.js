@@ -88,6 +88,10 @@ function resizer() {
 var c = document.getElementById("canvas_info");
 c.width = 1400;
 c.height = 200;
+c.addEventListener('click', function() {
+	frn = frn_start;
+}
+	, false);
 
 // Init:Renderer
 var renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});

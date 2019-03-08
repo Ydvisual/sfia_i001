@@ -321,7 +321,7 @@ var draw = function() {
 	ctx.lineTo(px, py0 + y_ext);
 	ctx.stroke();
 	
-	str = "a=2, ntime: " + ntime;
+	str = "a=2click, ntime: " + ntime;
 	ctx.font = "20px Georgia";
 	ctx.fillText(str, 10, 180);
 	

@@ -8,21 +8,25 @@ var asp = cv.width / cv.height;
 var cam = new THREE.PerspectiveCamera(36, asp, 0.1, 1000);
 var clock = new THREE.Clock();
 clock.start();
-var frn = -120;
+var frn_start = -150;
+var frn = frn_start;
 var frn_adv = 2;
 var frn_max = 60100; // Lower = faster (6000 def)
 var ntime = 0.0; // normal time
+var debug_time = false;
+var mx = -1;
+var tpx0 = 0;
+var line_ww = 0;
 
-// 1.57 Max (PI/2)
+// -------------------------------- Sun data
 var angle_dust = [
-	[-1.0000, 0.157],
-	[-0.0120, 0.150],
+	[-1.0000, 0.120],
+	[-0.0120, 0.100],
 	[0.0000, 0.0100],
 	[0.0010, 0.0000],
 	[1.0000, 0.0000]
 ];
-
-// sun = white dwarf
+// white dwarf phase
 var int_core = [
 	[0.000, 0.0],
 	[0.23, 0.0],
@@ -30,11 +34,9 @@ var int_core = [
 	[0.80, 1.20],
 	[1.00, 0.20],
 ];
-
-// Sun regular to red giant
 var int_sun = [
-	[0.0000, 5.0],
-	[0.0041,6.0],
+	[0.0000, 4.5],
+	[0.0041,5.2],
 	[0.2000,12.0],
 	[0.2700,95.0],
 	[0.2900,0.0],
@@ -57,14 +59,50 @@ var c_green_sun = [
 ];
 var c_blue_sun = [
 	[0.00,0.0],
-	[0.20,0.0],
-	[0.22,0.0],
-	[0.26,0.0],
-	[0.270,0.0],
-	[0.275,0.0],
-	[0.55,0.0],
 	[1.00,0.0]
 ];
+
+// -------------------------------- Red dwarf data
+// Red dwarf dust
+var angle_dust_rd = [
+	[-1.0000, 0.050],
+	[-0.0120, 0.040],
+	[ 0.0000, 0.000],
+	[ 0.0010, 0.000],
+	[ 1.0000, 0.000]
+];
+// Red dwarf intensity
+var int_rdwarf = [
+	[0.0000, 0.5],
+	[0.0012, 1.3],
+	[0.5000, 1.1],	
+	[0.5100, 2.0],	
+	[0.5700, 0.0],	
+	[0.7100, 0.0],	
+	[1.0000, 0.0]
+];
+
+var c_red_rd = [
+	[0.00,1.0],
+	[0.50,1.0],	
+	[0.51, 0.0],
+	[1.00, 0.0]
+];
+var c_blue_rd = [
+	[0.00,0.0],
+	[0.50,0.0],
+	[0.51,1.0],
+	[1.00,0.0]
+];
+// White dwarf remnant
+var int_core_rd = [
+	[0.000, 0.0],
+	[0.52, 0.0],
+	[0.54, 7.0],
+	[0.70, 3.5],
+	[1.00, 0.0],
+];
+
 
 
 function resizer() {
@@ -84,14 +122,22 @@ function resizer() {
     renderer.setSize(cv_w, cv_h);		
 }
 
+//Get Mouse Position
+function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+    };
+}
 // Init: Time canvas
 var c = document.getElementById("canvas_info");
 c.width = 1400;
-c.height = 200;
-c.addEventListener('click', function() {
+c.height = 170;
+c.addEventListener('click', function(evt) {	
+	var mousePos = getMousePos(c, evt);
 	frn = 0;
-}
-	, false);
+}, false);
 
 // Init:Renderer
 var renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
@@ -115,48 +161,66 @@ function onWindowResize(){
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
     var keyCode = event.which;
+	// 13=Enter
+	if (keyCode == 13) {
+		frn = frn_start;
+    }	
 	// 49=1
 	if (keyCode == 49) {
 		frn_adv = 1;
-		frn = -120;
     }	
 	// 50=2
 	if (keyCode == 50) {
 		frn_adv = 2;
-		frn = -120;
     }	
 	// 51=3
 	if (keyCode == 51) {
 		frn_adv = 4;
-		frn = -120;
     }	
 	// 52=4
 	if (keyCode == 52) {
 		frn_adv = 8;
-		frn = -120;
     }	
 	// 53=5
 	if (keyCode == 53) {
 		frn_adv = 16;
-		frn = -120;
     }	
 	// 54=6
-	if (keyCode == 53) {
+	if (keyCode == 54) {
 		frn_adv = 32;
-		frn = -120;
+    }	
+	// 55=7
+	if (keyCode == 55) {
+		frn_adv = 64;
+    }	
+	// 56=8
+	if (keyCode == 56) {
+		frn_adv = 100;
     }	
 	//////////// 37,39 = Left,right arrow
 	if (keyCode == 37) {
-		frn = frn - 200;
+		frn = frn - 300;
+		if (frn < -200) {
+			frn = -200;
+		}
     }	
 	if (keyCode == 39) {
-		frn = frn + 200;
+		frn = frn + 300;
     }	
 	
 	// space = 32, w=87
     if (keyCode == 32) {
 		//meshFloor.material.color.setHex("0x00ff00");		
 		frn = -120;
+    }	
+	if (keyCode == 78) {
+		// 78=n
+		if (debug_time) {
+			debug_time = false;
+		}
+		else {
+			debug_time = true;
+		}
     }	
 };
 
@@ -183,12 +247,12 @@ var ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.0);
 px = 2.20; 
 pz = 0.040; //0.100
 
-// Main sun (Color, intensity, distance(0=inf), decay)
+// ------------------------------------------------------------------------------ L1: Our sun ----
+//(color, int, dist(0=-inf), decay)
 var L1 = new THREE.PointLight(0xFFFF00, 2.0, 0, 2.0);
 L1.castShadow = false;
 scene.add(L1);
 L1.position.set(-px, 0, pz); // Sun
-
 // Dust cloud
 angle = 0.84; // changes in update()
 pn = 1.0;
@@ -197,7 +261,6 @@ L1_dust.position.set(-px, 0, 40);
 L1_dust.target.position.set(-px, 0, 0);
 scene.add(L1_dust.target);
 scene.add(L1_dust);
-
 // Main sun core (remnant)
 var L1_core = new THREE.PointLight(0xFFFFFF, 2.0, 0, 2.0);
 L1_core.castShadow = false;
@@ -205,16 +268,23 @@ scene.add(L1_core);
 L1_core.position.set(-px, 0, 0.0050);
 
 
-
-// Color, intensity, distance, decay
-var L2 = new THREE.PointLight(0xAA0201, 4.0, 0, 2.0);
+// ------------------------------------------------------------------- L2: Red dwarf sun
+pzr = 0.100;
+var L2 = new THREE.PointLight(0xFF3000, 1.0, 0, 2.0); // color, int, dist, decy
 L2.castShadow = false;
 scene.add(L2);
-
-
-L2.position.set(px,0, pz); //s
-// v01
-//L1.position.set(15,12,12);
+L2.position.set(px,0, pzr);
+// Red dwarf dust
+var L2_dust = new THREE.SpotLight(0x333333, 1.0, 0, angle, pn, 0);
+L2_dust.position.set(px, 0, 40);
+L2_dust.target.position.set(px, 0, 0);
+scene.add(L2_dust.target);
+scene.add(L2_dust);
+// Main sun core (remnant)
+var L2_core = new THREE.PointLight(0xFFFFFF, 2.0, 0, 2.0);
+L2_core.castShadow = false;
+scene.add(L2_core);
+L2_core.position.set(px, 0, 0.0050);
 
 
 // Cam pos
@@ -245,16 +315,15 @@ var update = function() {
 	// start: -0.010 to 0.0
 	
 	
-	// Sun dust collapsing
+	// ---------------------------------------------- Our sun
 	val = (300.0 * -ntime) + 0.25;
 	if (val <= 0.0) { val = 0.0;}
 	val = calc_val(angle_dust);
 	L1_dust.angle = val;
 	
-
 	// Main sun intensity	
 	val = calc_val(int_sun);
-	var r = Math.random() * 0.0120;
+	r = Math.random() * 0.0120;
 	val = val + (val * r);
 	L1.intensity = val;
 	
@@ -268,17 +337,39 @@ var update = function() {
 	
 	// Main sun white dwarf remnant
 	val = calc_val(int_core);
-	var r = Math.random() * 0.090;
+	r = Math.random() * 0.090;
 	val = val + (val * r);
 	L1_core.intensity = val;
-		
-	L2.position.z += 0.0000; // Red dwarf
-	L2.intensity = 1.210;
+	
+	// ---------------------------------------------- Red dwarf
+	// Dust collapse
+	val = (300.0 * -ntime) + 0.25;
+	if (val <= 0.0) { val = 0.0;}
+	val = calc_val(angle_dust_rd);
+	L2_dust.angle = val;
+	
+	// -- Intensity
+	val = calc_val(int_rdwarf);
+	r = Math.random() * 0.020;
+	val = val + (val * r);
+	L2.intensity = val;	
+	
+	// Red dwarf
+	cr = calc_val(c_red_rd);
+	cg = 0.0;
+	cb = calc_val(c_blue_rd);
+	L2.color.r = cr;
+	L2.color.g = cg;
+	L2.color.b = cb;
+	
+	// White dwarf remnant
+	val = calc_val(int_core_rd);
+	r = Math.random() * 0.090;
+	val = val + (val * r);
+	L2_core.intensity = val;
 	
 	
-	//L2.intensity += 0.000;
-	//L2.color.setHex( 0x00ff00 );
-	
+	// -------------------------------- Next
 	frn += frn_adv;
 	if (frn > frn_max) {
 		frn = frn_max;
@@ -300,32 +391,34 @@ var draw = function() {
 	ctx.drawImage(img_info, 0, 0, ww, ww * img_info.height / img_info.width);
 	//ctx.globalCompositeOperation = 'destination-over';
 	// Time ticker
-	ctx.strokeStyle = "#EEE";
-	ctx.lineWidth = 3.0;
+	ctx.strokeStyle = "#FF0";
+	ctx.lineWidth = 3.5;
 	ctx.beginPath();
+	
 	wsc = ww / 1400.0;
-	px0 = 75.0 * wsc;
-	py0 = 75.0 * wsc;
+	tpx0 = 53.0 * wsc;
+	py0 = 60.0 * wsc;
 	// Time speed
 	n_frn = (frn / frn_max); // 0->1.0 in speed_f frames
 	q = 1.0 - n_frn;
 	mn = q * q * q * q * q;	
 	fak = (1.0 - mn);	
-	line_ww = 1249.0;
+	line_ww = 1278.0 * wsc;
 	dx = line_ww * fak; //
-	px = px0 + dx;	
+	px = tpx0 + dx;	
 	ntime = fak;
 	
 	y_ext = 15.0 * wsc;
 	ctx.moveTo(px, py0 - y_ext);
-	ctx.lineTo(px, py0 + y_ext);
+	ctx.lineTo(px, py0 + y_ext + 1);
 	ctx.stroke();
 	
-	str = "a=2click,f0, ntime: " + ntime;
-	ctx.font = "20px Georgia";
-	ctx.fillText(str, 10, 180);
-	
-	
+	if (debug_time) {
+		str = "ntime: " + ntime + " m: " + mx;
+		ctx.font = "20px Arial";
+		ctx.fillText(str, 5, 22);
+	}
+		
 	//// WebGL Canvas
 	update(); // pos/rot = f(time)
 	render();
